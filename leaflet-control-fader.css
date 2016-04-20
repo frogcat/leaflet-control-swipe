@@ -1,0 +1,44 @@
+/* horizontal */
+
+.leaflet-control-fader-horizontal.leaflet-control {
+  font-size: 28px;
+  cursor: pointer;
+  color: #0078A8;
+  margin-left: -1em !important;
+  width: 2em;
+  text-align: center;
+  opacity: 0.5;
+}
+.leaflet-control-fader-horizontal.leaflet-control:hover {
+  opacity: 1.0;
+}
+.leaflet-control-fader-horizontal.leaflet-control.leaflet-drag-target {
+  opacity: 1.0;
+}
+.leaflet-control-fader-horizontal.leaflet-layer {
+  overflow: hidden;
+  border-right: 1px solid #0078A8;
+}
+
+/* vertical */
+
+.leaflet-control-fader-vertical.leaflet-control {
+  font-size: 28px;
+  cursor: pointer;
+  color: #0078A8;
+  width: 1em;
+  text-align: center;
+  opacity: 0.5;
+  line-height: 100%;
+  margin-top: -1em;
+}
+.leaflet-control-fader-vertical.leaflet-control:hover {
+  opacity: 1.0;
+}
+.leaflet-control-fader-vertical.leaflet-control.leaflet-drag-target {
+  opacity: 1.0;
+}
+.leaflet-control-fader-vertical.leaflet-layer {
+  overflow: hidden;
+  border-bottom: 1px solid #0078A8;
+}
