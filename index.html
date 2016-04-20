@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>leaflet-control-fader</title>
+  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v1.0.0-rc.1/leaflet.css" />
+  <script src="http://cdn.leafletjs.com/leaflet/v1.0.0-rc.1/leaflet.js"></script>
+  <script src="leaflet-control-fader.js"></script>
+  <style>
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      maring: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script>
+    var a = L.tileLayer("http://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg");
+    var b = L.tileLayer("http://cyberjapandata.gsi.go.jp/xyz/english/{z}/{x}/{y}.png");
+    var map = L.map("map", {
+      maxZoom: 20,
+      minZoom: 2,
+      zoom: 8,
+      center: [32.711225, 130.673554],
+      layers: [a, b]
+    });
+    L.control.fader([b]).addTo(map);
+  </script>
+</body>
+
+</html>
