@@ -4,39 +4,38 @@
     options: {
       position: 'bottomleft',
       orientation: 'horizontal',
-      initialRatio: 0.5
+      initialScale: 0.5,
     },
     initialize: function(layers, options) {
       L.Util.setOptions(this, options);
       this._layers = [];
-      this._clazz = "leaflet-control-fader-" + this.options.orientation;
       layers.forEach(function(layer) {
         if (layer.getContainer) {
-          L.DomUtil.addClass(layer.getContainer(), this._clazz);
+          L.DomUtil.addClass(layer.getContainer(), 'leaflet-control-fader-layer');
           this._layers.push(layer);
         }
       }, this);
-      this._ratio = this.options.initialRatio;
     },
     _initContainer: function() {
-      var container = L.DomUtil.create('div', this._clazz);
-      if (this.options.orientation == "vertical")
-        container.innerHTML = "&#x25B2;<br/>&#x25BC;";
-      else
-        container.innerHTML = "&#x25C4;&#x25BA;";
-
-      var draggable = new L.Draggable(container);
-      draggable.enable();
-      draggable.on('drag', this._onDrag, this);
-      this._container = container;
+      var o = this.options;
+      var e = L.DomUtil.create('div', 'leaflet-control-fader');
+      if (o.orientation == "vertical") {
+        L.DomUtil.addClass(e, "leaflet-control-fader-vertical");
+        this._scale = L.point(1.0, o.initialScale);
+      } else {
+        L.DomUtil.addClass(e, "leaflet-control-fader-horizontal");
+        this._scale = L.point(o.initialScale, 1.0);
+      }
+      var d = new L.Draggable(e);
+      d.on('drag', this._onDrag, this);
+      d.enable();
+      this._container = e;
     },
     _onDrag: function() {
-      var size = this._map.getSize();
-      var position = L.DomUtil.getPosition(this._container);
-      if (this.options.orientation == "vertical")
-        this._ratio = Math.min(1, Math.max(0, position.y / size.y));
-      else
-        this._ratio = Math.min(1, Math.max(0, position.x / size.x));
+      var p = L.DomUtil.getPosition(this._container).unscaleBy(this._map.getSize())
+      this._scale = (this.options.orientation == "vertical" ? L.point(1.0, p.y) : L.point(p.x, 1.0));
+      this._scale.x = Math.min(1, Math.max(0, this._scale.x));
+      this._scale.y = Math.min(1, Math.max(0, this._scale.y));
       this._update();
     },
     onAdd: function(map) {
@@ -51,27 +50,30 @@
     },
     _update: function() {
 
-      var outer = this._map.getSize();
-      var inner = outer.multiplyBy(this._ratio);
-      var min = this._map.containerPointToLayerPoint([0, 0]);
-      var max = this._map.containerPointToLayerPoint([inner.x, outer.y]);
-      if (this.options.orientation == "vertical") {
-        max = this._map.containerPointToLayerPoint([outer.x, inner.y]);
-        L.DomUtil.setPosition(this._container, L.point(0, inner.y));
-      } else {
-        L.DomUtil.setPosition(this._container, L.point(inner.x, 0));
-      }
+      var b = L.bounds(
+        this._map.containerPointToLayerPoint(L.point(0, 0)),
+        this._map.containerPointToLayerPoint(this._map.getSize().scaleBy(this._scale))
+      );
+      var x = b.min.x;
+      var y = b.min.y;
+      var w = b.getSize().x;
+      var h = b.getSize().y;
+
+      if (this.options.orientation == "vertical")
+        L.DomUtil.setPosition(this._container, L.point(0, h));
+      else
+        L.DomUtil.setPosition(this._container, L.point(w, 0));
 
       this._layers.forEach(function(layer) {
         var e = layer.getContainer();
-        e.style.left = min.x + "px";
-        e.style.top = min.y + "px";
-        e.style.width = (max.x - min.x) + "px";
-        e.style.height = (max.y - min.y) + "px";
+        e.style.left = x + "px";
+        e.style.top = y + "px";
+        e.style.width = w + "px";
+        e.style.height = h + "px";
         for (var f = e.firstChild; f; f = f.nextSibling) {
           if (f.style) {
-            f.style.marginTop = (-min.y) + "px";
-            f.style.marginLeft = (-min.x) + "px";
+            f.style.marginTop = (-y) + "px";
+            f.style.marginLeft = (-x) + "px";
           }
         }
       });
