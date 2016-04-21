@@ -6,11 +6,10 @@
   border-bottom: 1px solid #0078A8;
 }
 .leaflet-control-fader {
-  font-size: 48px;
   cursor: pointer;
   color: #0078A8;
   text-align: center;
-  line-height: 48px;
+  text-shadow: 0 -1px #fff, 0 1px #000;
 }
 
 /* horizontal */
@@ -18,6 +17,8 @@
 .leaflet-control-fader-horizontal {
   margin-left: -1em !important;
   width: 2em;
+  font-size: 48px;
+  line-height: 48px;
 }
 .leaflet-control-fader-horizontal::before {
   content: '\25C0\25B6';
@@ -28,6 +29,8 @@
 .leaflet-control-fader-vertical {
   margin-top: -1em !important;
   width: 1em;
+  font-size: 32px;
+  line-height: 32px;
 }
 .leaflet-control-fader-vertical::before {
   content: '\25B2\A\25BC';
