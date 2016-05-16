@@ -3,12 +3,12 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>leaflet-control-fader</title>
+  <title>leaflet-control-swipe</title>
   <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
   <link rel="stylesheet" href="//cdn.leafletjs.com/leaflet/v1.0.0-rc.1/leaflet.css" />
-  <link rel="stylesheet" href="leaflet-control-fader.css" />
+  <link rel="stylesheet" href="leaflet-control-swipe.css" />
   <script src="//cdn.leafletjs.com/leaflet/v1.0.0-rc.1/leaflet.js"></script>
-  <script src="leaflet-control-fader.js"></script>
+  <script src="leaflet-control-swipe.js"></script>
   <style>
     body {
       width: 100%;
@@ -41,11 +41,11 @@
       layers: [bg, fg]
     });
     map.attributionControl.setPrefix(
-      "<a href='https://github.com/frogcat/leaflet-control-fader'>fork me on GitHub</a>"
+      "<a href='https://github.com/frogcat/leaflet-control-swipe'>fork me on GitHub</a>"
     ).addAttribution(
       "<a href='http://maps.gsi.go.jp/development/ichiran.html'>GSI</a>"
     );
-    L.control.fader([fg], {
+    L.control.swipe([fg], {
       position: "topright",
       orientation: "vertical"
     }).addTo(map);

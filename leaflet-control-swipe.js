@@ -1,6 +1,6 @@
 (function(window) {
 
-  L.Control.Fader = L.Control.extend({
+  L.Control.Swipe = L.Control.extend({
     options: {
       position: 'bottomleft',
       orientation: 'horizontal',
@@ -11,19 +11,19 @@
       this._layers = [];
       layers.forEach(function(layer) {
         if (layer.getContainer) {
-          L.DomUtil.addClass(layer.getContainer(), 'leaflet-control-fader-layer');
+          L.DomUtil.addClass(layer.getContainer(), 'leaflet-control-swipe-layer');
           this._layers.push(layer);
         }
       }, this);
     },
     _initContainer: function() {
       var o = this.options;
-      var e = L.DomUtil.create('div', 'leaflet-control-fader');
+      var e = L.DomUtil.create('div', 'leaflet-control-swipe');
       if (o.orientation == "vertical") {
-        L.DomUtil.addClass(e, "leaflet-control-fader-vertical");
+        L.DomUtil.addClass(e, "leaflet-control-swipe-vertical");
         this._scale = L.point(1.0, o.initialScale);
       } else {
-        L.DomUtil.addClass(e, "leaflet-control-fader-horizontal");
+        L.DomUtil.addClass(e, "leaflet-control-swipe-horizontal");
         this._scale = L.point(o.initialScale, 1.0);
       }
       var d = new L.Draggable(e);
@@ -79,7 +79,7 @@
       });
     }
   });
-  L.control.fader = function(layers, options) {
-    return new L.Control.Fader(layers, options);
+  L.control.swipe = function(layers, options) {
+    return new L.Control.Swipe(layers, options);
   };
 })(window);
