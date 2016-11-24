@@ -1,18 +1,18 @@
 {
-  "name": "leaflet-control-fader",
+  "name": "leaflet-control-swipe",
   "version": "1.0.0",
   "description": "Swipe control plugin for Leaflet 1.0",
   "main": "leaflet-control-swipe.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frogcat/leaflet-control-fader.git"
+    "url": "git+https://github.com/frogcat/leaflet-control-swipe.git"
   },
   "author": "frogcat",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/frogcat/leaflet-control-fader/issues"
+    "url": "https://github.com/frogcat/leaflet-control-swipe/issues"
   },
-  "homepage": "https://github.com/frogcat/leaflet-control-fader#readme",
+  "homepage": "https://github.com/frogcat/leaflet-control-swipe#readme",
   "dependencies": {
     "leaflet": "^1.0.0"
   }

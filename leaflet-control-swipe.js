@@ -2,27 +2,15 @@
 
   L.Control.Swipe = L.Control.extend({
     options: {
-      position: 'bottomleft',
-      initialPoint: L.point(0.5, 1.0)
-    },
-    initialize: function(options) {
-      L.setOptions(this, options);
-      this._layers = [];
-      this._point = this.options.initialPoint;
+      position: 'bottomleft'
     },
     _onDrag: function() {
-      var p = L.DomUtil.getPosition(this._container).unscaleBy(this._map.getSize());
-      this._point = L.point(Math.min(1.0, Math.max(0, p.x)), 1.0);
-      this._update();
+      var x = L.DomUtil.getPosition(this._container).x;
+      var size = this._map.getSize();
+      size.x = Math.max(0, Math.min(size.x, x));
+      this._map.setSwipePaneSize(size);
     },
-    _onLayerChange: function() {
-      this._layers = [];
-      this._map.eachLayer(function(layer) {
-        if (layer.options.pane === "swipePane")
-          this._layers.push(layer.getContainer());
-      }, this);
-    },
-    _initContainer: function() {
+    onAdd: function(map) {
       var e = L.DomUtil.create('div', 'leaflet-control-swipe');
       e.style.cursor = "pointer";
       e.style.color = "#0078A8";
@@ -32,37 +20,16 @@
       e.style.width = "2em";
       e.style.fontSize = "48px";
       e.style.lineHeight = "48px";
-      e.innerHTML = '\u25C0\u25B6';
-      (new L.Draggable(e)).on('drag', this._onDrag, this).enable();
+      e.innerHTML = "\u25C0\u25B6";
       this._container = e;
-    },
-    onAdd: function(map) {
-      this._initContainer();
-      this._map.on('layeradd layerremove', this._onLayerChange, this).fire("layeradd");
-      this._map.on('move', this._update, this).fire("move");
+      (new L.Draggable(e)).on("drag", this._onDrag, this).enable();
+      map.on("swipePaneUpdate", this._update, this);
+      this._update();
       return this._container;
     },
-    onRemove: function() {
-      this._map.off('move', this._update, this);
-      this._map.off('layeradd layerremove', this._onLayerChange, this);
-    },
     _update: function() {
-
-      var min = this._map.containerPointToLayerPoint(L.point(0, 0));
-      var max = this._map.containerPointToLayerPoint(this._map.getSize().scaleBy(this._point));
-
-      L.DomUtil.setPosition(this._container, L.point(max.x - min.x, 0));
-
-      var pane = this._map.getPane("swipePane");
-      pane.style.left = min.x + "px";
-      pane.style.top = min.y + "px";
-      pane.style.width = (max.x - min.x) + "px";
-      pane.style.height = (max.y - min.y) + "px";
-
-      this._layers.forEach(function(e) {
-        e.style.marginTop = (-min.y) + "px";
-        e.style.marginLeft = (-min.x) + "px";
-      });
+      var s = this._map.getSwipePaneSize();
+      L.DomUtil.setPosition(this._container, L.point(s.x, 0));
     }
   });
 
@@ -70,6 +37,36 @@
     var e = this.createPane("swipePane");
     e.style.zIndex = 201;
     e.style.overflow = "hidden";
+    this.setSwipePaneSize(this.getSize().scaleBy(L.point(0.5, 1)));
+    this.on("move", function() {
+      var push = this.containerPointToLayerPoint(L.point(0, 0));
+      var pull = push.multiplyBy(-1);
+      L.DomUtil.setPosition(e, push);
+      for (var f = e.firstChild; f; f = f.nextSibling)
+        L.DomUtil.setPosition(f, pull);
+    }, this);
+    this.on("resize", function(event) {
+      var size = this.getSwipePaneSize();
+      size = size.scaleBy(event.newSize);
+      size = size.unscaleBy(event.oldSize);
+      this.setSwipePaneSize(size);
+    }, this);
+  });
+
+  L.Map.include({
+    setSwipePaneSize: function(size) {
+      var e = this.getPane("swipePane");
+      e.style.width = size.x + "px";
+      e.style.height = size.y + "px";
+      this.fire("swipePaneUpdate");
+    },
+    getSwipePaneSize: function() {
+      var e = this.getPane("swipePane");
+      return L.point(
+        parseFloat(e.style.width.replace("px", "")),
+        parseFloat(e.style.height.replace("px", ""))
+      );
+    }
   });
 
   L.control.swipe = function(options) {
