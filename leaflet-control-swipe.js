@@ -3,83 +3,77 @@
   L.Control.Swipe = L.Control.extend({
     options: {
       position: 'bottomleft',
-      orientation: 'horizontal',
-      initialScale: 0.5,
+      initialPoint: L.point(0.5, 1.0)
     },
-    initialize: function(layers, options) {
-      L.Util.setOptions(this, options);
+    initialize: function(options) {
+      L.setOptions(this, options);
       this._layers = [];
-      layers.forEach(function(layer) {
-        if (layer.getContainer) {
-          L.DomUtil.addClass(layer.getContainer(), 'leaflet-control-swipe-layer');
-          this._layers.push(layer);
-        }
+      this._point = this.options.initialPoint;
+    },
+    _onDrag: function() {
+      var p = L.DomUtil.getPosition(this._container).unscaleBy(this._map.getSize());
+      this._point = L.point(Math.min(1.0, Math.max(0, p.x)), 1.0);
+      this._update();
+    },
+    _onLayerChange: function() {
+      this._layers = [];
+      this._map.eachLayer(function(layer) {
+        if (layer.options.pane === "swipePane")
+          this._layers.push(layer.getContainer());
       }, this);
     },
     _initContainer: function() {
-      var o = this.options;
       var e = L.DomUtil.create('div', 'leaflet-control-swipe');
-      if (o.orientation == "vertical") {
-        L.DomUtil.addClass(e, "leaflet-control-swipe-vertical");
-        this._scale = L.point(1.0, o.initialScale);
-      } else {
-        L.DomUtil.addClass(e, "leaflet-control-swipe-horizontal");
-        this._scale = L.point(o.initialScale, 1.0);
-      }
-      var d = new L.Draggable(e);
-      d.on('drag', this._onDrag, this);
-      d.enable();
+      e.style.cursor = "pointer";
+      e.style.color = "#0078A8";
+      e.style.textAlign = "center";
+      e.style.textShadow = "0 -1px #fff, 0 1px #000";
+      e.style.marginLeft = "-1em";
+      e.style.width = "2em";
+      e.style.fontSize = "48px";
+      e.style.lineHeight = "48px";
+      e.innerHTML = '\u25C0\u25B6';
+      (new L.Draggable(e)).on('drag', this._onDrag, this).enable();
       this._container = e;
-    },
-    _onDrag: function() {
-      var p = L.DomUtil.getPosition(this._container).unscaleBy(this._map.getSize())
-      this._scale = (this.options.orientation == "vertical" ? L.point(1.0, p.y) : L.point(p.x, 1.0));
-      this._scale.x = Math.min(1, Math.max(0, this._scale.x));
-      this._scale.y = Math.min(1, Math.max(0, this._scale.y));
-      this._update();
     },
     onAdd: function(map) {
       this._initContainer();
-      this._map = map;
-      this._map.on('move', this._update, this);
-      this._update();
+      this._map.on('layeradd layerremove', this._onLayerChange, this).fire("layeradd");
+      this._map.on('move', this._update, this).fire("move");
       return this._container;
     },
     onRemove: function() {
       this._map.off('move', this._update, this);
+      this._map.off('layeradd layerremove', this._onLayerChange, this);
     },
     _update: function() {
 
-      var b = L.bounds(
-        this._map.containerPointToLayerPoint(L.point(0, 0)),
-        this._map.containerPointToLayerPoint(this._map.getSize().scaleBy(this._scale))
-      );
-      var x = b.min.x;
-      var y = b.min.y;
-      var w = b.getSize().x;
-      var h = b.getSize().y;
+      var min = this._map.containerPointToLayerPoint(L.point(0, 0));
+      var max = this._map.containerPointToLayerPoint(this._map.getSize().scaleBy(this._point));
 
-      if (this.options.orientation == "vertical")
-        L.DomUtil.setPosition(this._container, L.point(0, h));
-      else
-        L.DomUtil.setPosition(this._container, L.point(w, 0));
-
-      this._layers.forEach(function(layer) {
-        var e = layer.getContainer();
-        e.style.left = x + "px";
-        e.style.top = y + "px";
-        e.style.width = w + "px";
-        e.style.height = h + "px";
+      L.DomUtil.setPosition(this._container, L.point(max.x - min.x, 0));
+      this._layers.forEach(function(e) {
+        e.style.overflow = "hidden";
+        e.style.left = min.x + "px";
+        e.style.top = min.y + "px";
+        e.style.width = (max.x - min.x) + "px";
+        e.style.height = (max.y - min.y) + "px";
         for (var f = e.firstChild; f; f = f.nextSibling) {
           if (f.style) {
-            f.style.marginTop = (-y) + "px";
-            f.style.marginLeft = (-x) + "px";
+            f.style.marginTop = (-min.y) + "px";
+            f.style.marginLeft = (-min.x) + "px";
           }
         }
       });
     }
   });
-  L.control.swipe = function(layers, options) {
-    return new L.Control.Swipe(layers, options);
+
+  L.Map.addInitHook(function() {
+    var e = this.createPane("swipePane");
+    e.style.zIndex = 201;
+  });
+
+  L.control.swipe = function(options) {
+    return new L.Control.Swipe(options);
   };
 })(window);
