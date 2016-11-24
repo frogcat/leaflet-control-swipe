@@ -52,18 +52,16 @@
       var max = this._map.containerPointToLayerPoint(this._map.getSize().scaleBy(this._point));
 
       L.DomUtil.setPosition(this._container, L.point(max.x - min.x, 0));
+
+      var pane = this._map.getPane("swipePane");
+      pane.style.left = min.x + "px";
+      pane.style.top = min.y + "px";
+      pane.style.width = (max.x - min.x) + "px";
+      pane.style.height = (max.y - min.y) + "px";
+
       this._layers.forEach(function(e) {
-        e.style.overflow = "hidden";
-        e.style.left = min.x + "px";
-        e.style.top = min.y + "px";
-        e.style.width = (max.x - min.x) + "px";
-        e.style.height = (max.y - min.y) + "px";
-        for (var f = e.firstChild; f; f = f.nextSibling) {
-          if (f.style) {
-            f.style.marginTop = (-min.y) + "px";
-            f.style.marginLeft = (-min.x) + "px";
-          }
-        }
+        e.style.marginTop = (-min.y) + "px";
+        e.style.marginLeft = (-min.x) + "px";
       });
     }
   });
@@ -71,6 +69,7 @@
   L.Map.addInitHook(function() {
     var e = this.createPane("swipePane");
     e.style.zIndex = 201;
+    e.style.overflow = "hidden";
   });
 
   L.control.swipe = function(options) {
